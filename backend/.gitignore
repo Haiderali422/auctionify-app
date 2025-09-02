@@ -1,0 +1,7 @@
+node_modules
+
+.env
+
+/src/generated/prisma
+
+/src/config/auctionify-app-firebase-adminsdk-fbsvc-8054b503d0.json

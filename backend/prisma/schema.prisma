@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+model User {
+id Int @id @default(autoincrement())
+firebase_uid String @unique
+email String
+name String?
+photoURL String?
+created_at DateTime @default(now())
+
+items Item[]
+bids Bid[]
+payments Payment[]
+auctionsWon Auction[] @relation("AuctionWinner")
+}
+
+model Item{
+id Int @id @default(autoincrement())
+title String
+description String?
+image_url String?
+auction_enabled Boolean @default(false)
+create_at DateTime @default(now())
+
+owner_id Int
+owner User @relation(fields: [owner_id], references: [id])
+aution Auction?
+}
+
+model Auction{
+id Int @id @default(autoincrement())
+starting_bid Float
+end_at DateTime
+is_closed Boolean
+
+item Item @relation(fields: [item_id],references: [id])
+item_id Int @unique
+bids Bid[]
+winner User? @relation("AuctionWinner", fields:[winner_id], references: [id])
+winner_id Int?
+payment Payment?
+}
+
+model Bid{
+id Int @id @default(autoincrement())
+amount Float
+created_at DateTime @default(now())
+
+auction Auction @relation(fields: [auction_id], references: [id])
+auction_id Int
+user User @relation(fields: [user_id],references: [id])
+user_id Int
+}
+
+
+model Payment{
+id Int @id @default(autoincrement())
+amount Float
+status PaymentStatus
+stripe_payment_id String @unique
+created_at DateTime @default(now())
+
+auction_id Int @unique
+auction Auction @relation(fields: [auction_id],references: [id])
+user_id Int
+user User @relation(fields: [user_id],references: [id])
+}
+
+enum PaymentStatus{
+  PENDING
+  SUCCESS
+  FAILED
+}
+
