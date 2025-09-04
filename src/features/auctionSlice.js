@@ -4,11 +4,14 @@ const initialState = {
   loginOpen: false,
   signUpOpen: false,
   loading: false,
-  user: null,
   error: null,
+  tokens: {
+    accessToken: localStorage.getItem('accessToken') || null,
+    refreshToken: localStorage.getItem('refreshToken') || null,
+  },
 };
 
-export const counterSlice = createSlice({
+export const auctionSlice = createSlice({
   name: 'auction',
   initialState,
   reducers: {
@@ -21,12 +24,35 @@ export const counterSlice = createSlice({
     SET_LOADING: (state, action) => {
       state.loading = action.payload;
     },
-    SET_USER: (state, action) => {
-      state.user = action.payload;
+    SET_ERROR: (state, action) => {
+      state.error = action.payload;
+    },
+    SET_TOKENS: (state, action) => {
+      state.tokens = action.payload;
+      // Store tokens in localStorage
+      if (action.payload.accessToken) {
+        localStorage.setItem('accessToken', action.payload.accessToken);
+      }
+      if (action.payload.refreshToken) {
+        localStorage.setItem('refreshToken', action.payload.refreshToken);
+      }
+    },
+    CLEAR_AUTH: (state) => {
+      state.user = null;
+      state.tokens = {
+        accessToken: null,
+        refreshToken: null,
+      };
+      // Clear tokens from localStorage
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('firebaseUser');
+      localStorage.removeItem('user');
     },
   },
 });
 
-export const { SET_LOGIN_OPEN, SET_LOADING, SET_SIGNUP_OPEN } = counterSlice.actions;
+export const { SET_LOGIN_OPEN, SET_LOADING, SET_SIGNUP_OPEN, SET_TOKENS, CLEAR_AUTH } =
+  auctionSlice.actions;
 
-export default counterSlice.reducer;
+export default auctionSlice.reducer;
