@@ -49,7 +49,10 @@ export const removeItem = createAsyncThunk(
 const itemsSlice = createSlice({
   name: 'items',
   initialState: {
-    items: [],
+    items: [
+      { id: 1, title: 'Mock Item 1', description: 'First mock item', image_url: '' },
+      { id: 2, title: 'Mock Item 2', description: 'Second mock item', image_url: '' },
+    ],
     loading: false,
     error: null,
   },

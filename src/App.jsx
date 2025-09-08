@@ -5,7 +5,6 @@ import SignIn from './Pages/SignIn/SignIn';
 import Dashboard from './Pages/Dashboard/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import Home from './Pages/Home/Home';
-
 const App = () => {
   return (
     <div>

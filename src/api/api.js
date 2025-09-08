@@ -2,7 +2,7 @@ import axios from 'axios';
 import { auth } from '../lib/firebase.js';
 
 const api = axios.create({
-  baseURL: 'https://faac99a00fd4.ngrok-free.app',
+  baseURL: 'http://172.29.16.1:4000',
   headers: { 'Content-Type': 'application/json' },
 });
 

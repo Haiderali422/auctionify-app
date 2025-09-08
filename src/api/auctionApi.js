@@ -3,6 +3,7 @@ import api from '../api/api';
 export const getUser = async () => {
   try {
     const response = await api.post('/users/save-profile');
+    console.log('resposne from get user', response);
     return response.data;
   } catch (error) {
     console.error('Error:', error);
@@ -69,6 +70,16 @@ export const updateItem = async (id, newItem) => {
 export const deleteItem = async (id) => {
   try {
     const response = await api.delete(`/users/items/${id}`);
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    console.error('Error', error);
+  }
+};
+
+export const health = async () => {
+  try {
+    const response = await api.get('/health/');
     console.log(response);
     return response.data;
   } catch (error) {

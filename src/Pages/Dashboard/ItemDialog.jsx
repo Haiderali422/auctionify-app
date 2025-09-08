@@ -1,74 +1,62 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Box } from '@mui/material';
+import { useForm, Controller } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Box,
-  Button,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-} from '@mui/material';
 import { createItem, modifyItem } from '../../features/itemSlice';
+import CustomInput from '../../Components/Common/CustomInput';
+import CustomButton from '../../Components/Common/CustomButton';
+import { itemSchema } from '../../Schemas/itemSchema';
 
 const ItemDialog = ({ open, onClose, editingItem }) => {
   const { id } = useSelector((state) => state.user);
   const dispatch = useDispatch();
-  //   const user = localStorage.getItem('user', JSON.parse(user));
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    price: '',
-    image: '',
-    auctionStatus: 'off',
-    startingBid: '',
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(itemSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+      price: '',
+      image: '',
+      startingBid: '',
+    },
   });
 
   useEffect(() => {
     if (editingItem) {
-      setFormData({
-        title: editingItem.title,
-        description: editingItem.description,
-        price: editingItem.price,
-        image: editingItem.image,
-        auctionStatus: editingItem.auctionStatus || 'off',
+      reset({
+        title: editingItem.title || '',
+        description: editingItem.description || '',
+        price: editingItem.price || '',
+        image: editingItem.image || '',
         startingBid: editingItem.startingBid || '',
       });
     } else {
-      setFormData({
+      reset({
         title: '',
         description: '',
         price: '',
         image: '',
-        auctionStatus: 'off',
         startingBid: '',
       });
     }
-  }, [editingItem, open]);
+  }, [editingItem, reset, open]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSave = () => {
-    const itemData = {
-      ...formData,
-      userId: id,
-    };
+  const onSubmit = (data) => {
+    const itemData = { ...data, userId: id };
 
     if (editingItem) {
       dispatch(modifyItem({ itemId: editingItem.id, itemData }));
     } else {
       dispatch(createItem(itemData));
     }
+
     onClose();
   };
 
@@ -76,86 +64,84 @@ const ItemDialog = ({ open, onClose, editingItem }) => {
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>{editingItem ? 'Edit Item' : 'Add New Item'}</DialogTitle>
       <DialogContent>
-        <Box component="form" sx={{ pt: 1 }}>
-          <TextField
-            autoFocus
-            margin="dense"
+        <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ pt: 1 }}>
+          <Controller
             name="title"
-            label="Item Title"
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={formData.title}
-            onChange={handleInputChange}
-            sx={{ mb: 2 }}
+            control={control}
+            render={({ field }) => (
+              <CustomInput
+                {...field}
+                label="Item Title"
+                error={!!errors.title}
+                helperText={errors.title?.message}
+              />
+            )}
           />
-          <TextField
-            margin="dense"
+
+          <Controller
             name="description"
-            label="Description"
-            type="text"
-            fullWidth
-            multiline
-            rows={3}
-            variant="outlined"
-            value={formData.description}
-            onChange={handleInputChange}
-            sx={{ mb: 2 }}
+            control={control}
+            render={({ field }) => (
+              <CustomInput
+                {...field}
+                label="Description"
+                multiline
+                rows={3}
+                error={!!errors.description}
+                helperText={errors.description?.message}
+              />
+            )}
           />
-          <TextField
-            margin="dense"
+          <Controller
             name="price"
-            label="Price"
-            type="number"
-            fullWidth
-            variant="outlined"
-            value={formData.price}
-            onChange={handleInputChange}
-            sx={{ mb: 2 }}
+            control={control}
+            render={({ field }) => (
+              <CustomInput
+                {...field}
+                label="Price"
+                type="number"
+                error={!!errors.price}
+                helperText={errors.price?.message}
+              />
+            )}
           />
-          <TextField
-            margin="dense"
+
+          <Controller
             name="image"
-            label="Image URL"
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={formData.image}
-            onChange={handleInputChange}
-            sx={{ mb: 2 }}
+            control={control}
+            render={({ field }) => (
+              <CustomInput
+                {...field}
+                label="Image URL"
+                error={!!errors.image}
+                helperText={errors.image?.message}
+              />
+            )}
           />
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel>Auction Status</InputLabel>
-            <Select
-              name="auctionStatus"
-              value={formData.auctionStatus}
-              label="Auction Status"
-              onChange={handleInputChange}
-            >
-              <MenuItem value="off">Off</MenuItem>
-              <MenuItem value="on">On</MenuItem>
-            </Select>
-          </FormControl>
-          {formData.auctionStatus === 'on' && (
-            <TextField
-              margin="dense"
+          {editingItem && (
+            <Controller
               name="startingBid"
-              label="Starting Bid"
-              type="number"
-              fullWidth
-              variant="outlined"
-              value={formData.startingBid}
-              onChange={handleInputChange}
+              control={control}
+              render={({ field }) => (
+                <CustomInput
+                  {...field}
+                  label="Starting Bid"
+                  type="number"
+                  error={!!errors.startingBid}
+                  helperText={errors.startingBid?.message}
+                />
+              )}
             />
           )}
+
+          <DialogActions>
+            <CustomButton onClick={onClose}>Cancel</CustomButton>
+            <CustomButton type="submit" variant="contained">
+              {editingItem ? 'Update' : 'Add'} Item
+            </CustomButton>
+          </DialogActions>
         </Box>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSave} variant="contained">
-          {editingItem ? 'Update' : 'Add'} Item
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 };

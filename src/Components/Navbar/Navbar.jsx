@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
@@ -46,7 +46,7 @@ const AuctionNavbar = () => {
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', my: 2 }}>
         <GavelIcon sx={{ color: 'primary.main', fontSize: 32, mr: 1 }} />
         <Typography variant="h6" component="div" sx={{ fontWeight: 700 }}>
-          Auction<span style={{ color: '#F72585' }}>Hub</span>
+          Auctioni<span style={{ color: '#F72585' }}>fy</span>
         </Typography>
       </Box>
       <List>
@@ -55,10 +55,10 @@ const AuctionNavbar = () => {
             <Button
               fullWidth
               sx={{
-                justifyContent: 'flex-start',
                 px: 3,
                 py: 1.5,
                 color: 'text.primary',
+                justifyContent: 'flex-start',
                 '&:hover': {
                   backgroundColor: 'primary.light',
                   color: 'white',
@@ -73,10 +73,12 @@ const AuctionNavbar = () => {
         <ListItem disablePadding>
           <Button
             fullWidth
+            component={Link}
+            to="/signup"
             sx={{
               justifyContent: 'flex-start',
-              px: 3,
-              py: 1.5,
+              px: 2,
+              py: 1,
               mt: 1,
               border: '2px solid',
               borderColor: 'primary.main',
@@ -87,7 +89,6 @@ const AuctionNavbar = () => {
               },
             }}
             startIcon={<PersonIcon />}
-            onClick={() => navigate('/signup')}
           >
             Sign In
           </Button>
@@ -95,10 +96,11 @@ const AuctionNavbar = () => {
         <ListItem disablePadding>
           <Button
             fullWidth
+            onClick={() => navigate('/signup')}
             sx={{
               justifyContent: 'flex-start',
-              px: 3,
-              py: 1.5,
+              px: 2,
+              py: 1,
               mt: 1,
               backgroundColor: 'primary.main',
               color: 'white',
@@ -107,7 +109,6 @@ const AuctionNavbar = () => {
               },
             }}
             startIcon={<PersonAddIcon />}
-            onClick={() => navigate('/signup')}
           >
             Register
           </Button>
@@ -137,33 +138,38 @@ const AuctionNavbar = () => {
                 display: { xs: 'none', sm: 'block' },
               }}
             >
-              Auction<span style={{ color: '#F72585' }}>Hub</span>
+              Auctioni<span style={{ color: '#F72585' }}>fy</span>
             </Typography>
-
-            {!isMobile && (
-              <Box sx={{ ml: 4, display: 'flex' }}>
-                {menuItems.map((item) => (
-                  <Button
-                    key={item.text}
-                    color="inherit"
-                    startIcon={item.icon}
-                    sx={{
-                      mx: 0.5,
-                      fontWeight: 600,
-                      '&:hover': {
-                        color: 'primary.main',
-                        backgroundColor: 'transparent',
-                      },
-                    }}
-                  >
-                    {item.text}
-                  </Button>
-                ))}
-              </Box>
-            )}
           </Box>
-
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {!isMobile && (
+            <Box
+              sx={{
+                display: 'flex',
+                position: 'absolute',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                gap: 4,
+              }}
+            >
+              {menuItems.map((item) => (
+                <Button
+                  key={item.text}
+                  color="inherit"
+                  startIcon={item.icon}
+                  sx={{
+                    fontWeight: 400,
+                    '&:hover': {
+                      color: 'primary.main',
+                      backgroundColor: 'transparent',
+                    },
+                  }}
+                >
+                  {item.text}
+                </Button>
+              ))}
+            </Box>
+          )}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {isMobile ? (
               <IconButton
                 color="inherit"
@@ -177,10 +183,11 @@ const AuctionNavbar = () => {
               <>
                 <Button
                   color="inherit"
-                  startIcon={<PersonIcon />}
+                  component={Link}
+                  to="/login"
+                  startIcon={<PersonIcon />} // Show icon on desktop
                   sx={{
-                    mx: 1,
-                    fontWeight: 600,
+                    fontWeight: 400,
                     border: '2px solid',
                     borderColor: 'primary.main',
                     color: 'primary.main',
@@ -194,9 +201,10 @@ const AuctionNavbar = () => {
                 </Button>
                 <Button
                   variant="contained"
+                  component={Link}
+                  to="/signup"
                   startIcon={<PersonAddIcon />}
                   sx={{
-                    mx: 1,
                     fontWeight: 600,
                     background: 'linear-gradient(135deg, #3A0CA3 0%, #4361EE 100%)',
                     '&:hover': {
@@ -217,11 +225,11 @@ const AuctionNavbar = () => {
         open={mobileOpen}
         onClose={handleDrawerToggle}
         ModalProps={{
-          keepMounted: true, // Better open performance on mobile.
+          keepMounted: true,
         }}
         sx={{
           display: { xs: 'block', md: 'none' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 240 },
+          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 300 },
         }}
       >
         {drawer}

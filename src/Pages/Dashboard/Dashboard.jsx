@@ -24,7 +24,7 @@ const Dashboard = () => {
   const [showProfile, setShowProfile] = useState(false);
 
   const dispatch = useDispatch();
-  const { loading, error } = useSelector((state) => state.items);
+  const { items, loading, error } = useSelector((state) => state.items);
   const { id } = useSelector((state) => state.user);
 
   useEffect(() => {
@@ -56,15 +56,13 @@ const Dashboard = () => {
     dispatch(clearError());
   };
 
-  const filteredItems = [];
-
   // Filter items based on active tab
-  // const filteredItems = items.filter((item) => {
-  //   if (activeTab === 0) return true; // All items (Added Items)
-  //   if (activeTab === 1) return item.auctionStatus === 'on'; // Listed Items (Auction ON)
-  //   if (activeTab === 2) return item.purchased; // Purchased Items
-  //   return true;
-  // });
+  const filteredItems = items.filter((item) => {
+    if (activeTab === 0) return true; // All items (Added Items)
+    if (activeTab === 1) return item.auctionStatus === 'on'; // Listed Items (Auction ON)
+    if (activeTab === 2) return item.purchased; // Purchased Items
+    return true;
+  });
 
   if (showProfile) {
     return <ProfileSection onBack={() => setShowProfile(false)} />;
