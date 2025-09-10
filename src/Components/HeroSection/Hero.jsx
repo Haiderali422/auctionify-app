@@ -1,32 +1,43 @@
 import React from 'react';
-import { Box, Container, Typography, Button, Grid } from '@mui/material';
+import { Box, Container, Typography, Button } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import featureItem from '../../assets/images/featureItem.PNG';
 
 const HeroSection = styled(Box)(({ theme }) => ({
   padding: theme.spacing(8, 0),
   background: 'linear-gradient(135deg, #3A0CA3 0%, #4361EE 100%)',
   color: 'white',
   borderRadius: '0 0 20px 20px',
-  marginBottom: theme.spacing(4),
+  marginBottom: theme.spacing(6),
+}));
+
+const HeroContent = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: theme.spacing(4),
   [theme.breakpoints.down('md')]: {
-    borderRadius: '0 0 15px 15px',
+    flexDirection: 'column',
+    textAlign: 'center',
   },
 }));
 
-const HeroContent = styled(Grid)(() => ({
-  alignItems: 'center',
-  minHeight: '400px',
+const HeroText = styled(Box)(({ theme }) => ({
+  flex: 1,
+  paddingRight: theme.spacing(4),
+  [theme.breakpoints.down('md')]: {
+    paddingRight: 0,
+    marginBottom: theme.spacing(4),
+  },
 }));
 
-const HeroImage = styled(Box)(({ theme }) => ({
+const HeroImage = styled(Box)(() => ({
+  flex: 1,
   textAlign: 'center',
   '& img': {
     maxWidth: '100%',
     borderRadius: '10px',
     boxShadow: '0 20px 40px rgba(0, 0, 0, 0.2)',
-    [theme.breakpoints.down('md')]: {
-      marginTop: theme.spacing(4),
-    },
   },
 }));
 
@@ -34,12 +45,11 @@ const Hero = () => {
   return (
     <HeroSection>
       <Container>
-        <HeroContent container>
-          <Grid item xs={12} md={6}>
+        <HeroContent>
+          {/* Left Text Section */}
+          <HeroText>
             <Typography
               variant="h1"
-              component="h1"
-              gutterBottom
               sx={{
                 fontSize: { xs: '2.2rem', md: '2.8rem' },
                 fontWeight: 600,
@@ -50,7 +60,6 @@ const Hero = () => {
             </Typography>
             <Typography
               variant="h6"
-              component="p"
               sx={{
                 opacity: 0.9,
                 mb: 4,
@@ -65,9 +74,7 @@ const Hero = () => {
               size="large"
               sx={{
                 bgcolor: 'primary.main',
-                '&:hover': {
-                  bgcolor: 'primary.dark',
-                },
+                '&:hover': { bgcolor: 'primary.dark' },
                 px: 4,
                 py: 1.5,
                 fontSize: '1.1rem',
@@ -75,15 +82,12 @@ const Hero = () => {
             >
               Explore Live Auctions
             </Button>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <HeroImage>
-              <img
-                src="https://placehold.co/600x400/3A0CA3/FFFFFF/png?text=Featured+Items"
-                alt="Auction Items"
-              />
-            </HeroImage>
-          </Grid>
+          </HeroText>
+
+          {/* Right Image Section */}
+          <HeroImage>
+            <img src={featureItem} alt="Auction Items" />
+          </HeroImage>
         </HeroContent>
       </Container>
     </HeroSection>

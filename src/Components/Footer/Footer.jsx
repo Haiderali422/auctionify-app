@@ -1,27 +1,24 @@
 import React from 'react';
-import { Box, Container, Typography, Grid, Link } from '@mui/material';
+import { Box, Container, Typography, Grid, Link, IconButton } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { Facebook, Twitter, Instagram, LinkedIn } from '@mui/icons-material';
 
 const FooterSection = styled(Box)(({ theme }) => ({
-  backgroundColor: theme.palette.text.primary,
+  backgroundColor: theme.palette.grey[900],
   color: 'white',
-  padding: theme.spacing(8, 0, 3),
+  padding: theme.spacing(8, 2, 3),
   marginTop: theme.spacing(8),
 }));
 
-const FooterContent = styled(Grid)(({ theme }) => ({
-  marginBottom: theme.spacing(4),
-}));
-
 const FooterColumn = styled(Box)(({ theme }) => ({
-  '& h3': {
+  '& h6': {
     color: 'white',
     marginBottom: theme.spacing(2),
-    fontSize: '1.2rem',
+    fontSize: '1.1rem',
     fontWeight: 600,
   },
   '& p': {
-    color: '#ccc',
+    color: theme.palette.grey[400],
     lineHeight: 1.6,
   },
 }));
@@ -31,34 +28,37 @@ const FooterList = styled('ul')(({ theme }) => ({
   padding: 0,
   margin: 0,
   '& li': {
-    marginBottom: theme.spacing(1),
+    marginBottom: theme.spacing(1.2),
   },
   '& a': {
-    color: '#ccc',
+    color: theme.palette.grey[400],
     textDecoration: 'none',
-    transition: 'color 0.2s ease',
+    fontSize: '0.95rem',
+    transition: 'all 0.3s ease',
     '&:hover': {
-      color: 'white',
+      color: theme.palette.primary.main,
+      paddingLeft: '4px',
     },
   },
+}));
+
+const SocialBox = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing(1.5),
+  marginTop: theme.spacing(2),
 }));
 
 const Copyright = styled(Box)(({ theme }) => ({
   textAlign: 'center',
   paddingTop: theme.spacing(3),
   borderTop: '1px solid #444',
-  color: '#ccc',
+  color: theme.palette.grey[500],
   fontSize: '0.9rem',
+  marginTop: theme.spacing(5),
 }));
 
 const Footer = () => {
   const footerLinks = {
-    company: [
-      { text: 'About Us', href: '#' },
-      { text: 'Careers', href: '#' },
-      { text: 'Press', href: '#' },
-      { text: 'Blog', href: '#' },
-    ],
     quickLinks: [
       { text: 'Live Auctions', href: '#' },
       { text: 'Upcoming Auctions', href: '#' },
@@ -75,24 +75,36 @@ const Footer = () => {
 
   return (
     <FooterSection>
-      <Container>
-        <FooterContent container spacing={4}>
+      <Container maxWidth="lg">
+        <Grid container spacing={4}>
+          {/* Company Info */}
           <Grid item xs={12} md={3}>
             <FooterColumn>
-              <Typography variant="h6" component="h3" gutterBottom>
-                AuctionHub
-              </Typography>
+              <Typography variant="h6">AuctionHub</Typography>
               <Typography variant="body2">
                 The world&apos;s most exciting auction platform for unique items and collectibles.
               </Typography>
+              <SocialBox>
+                <IconButton size="small" sx={{ color: 'white' }}>
+                  <Facebook />
+                </IconButton>
+                <IconButton size="small" sx={{ color: 'white' }}>
+                  <Twitter />
+                </IconButton>
+                <IconButton size="small" sx={{ color: 'white' }}>
+                  <Instagram />
+                </IconButton>
+                <IconButton size="small" sx={{ color: 'white' }}>
+                  <LinkedIn />
+                </IconButton>
+              </SocialBox>
             </FooterColumn>
           </Grid>
 
+          {/* Quick Links */}
           <Grid item xs={12} sm={6} md={3}>
             <FooterColumn>
-              <Typography variant="h6" component="h3" gutterBottom>
-                Quick Links
-              </Typography>
+              <Typography variant="h6">Quick Links</Typography>
               <FooterList>
                 {footerLinks.quickLinks.map((link, index) => (
                   <li key={index}>
@@ -103,11 +115,10 @@ const Footer = () => {
             </FooterColumn>
           </Grid>
 
+          {/* Support */}
           <Grid item xs={12} sm={6} md={3}>
             <FooterColumn>
-              <Typography variant="h6" component="h3" gutterBottom>
-                Help & Support
-              </Typography>
+              <Typography variant="h6">Help & Support</Typography>
               <FooterList>
                 {footerLinks.support.map((link, index) => (
                   <li key={index}>
@@ -118,12 +129,11 @@ const Footer = () => {
             </FooterColumn>
           </Grid>
 
+          {/* Contact */}
           <Grid item xs={12} md={3}>
             <FooterColumn>
-              <Typography variant="h6" component="h3" gutterBottom>
-                Contact Us
-              </Typography>
-              <Typography variant="body2" sx={{ color: '#ccc' }}>
+              <Typography variant="h6">Contact Us</Typography>
+              <Typography variant="body2">
                 Email: support@auctionhub.com
                 <br />
                 Phone: +1 (555) 123-4567
@@ -132,10 +142,12 @@ const Footer = () => {
               </Typography>
             </FooterColumn>
           </Grid>
-        </FooterContent>
+        </Grid>
 
         <Copyright>
-          <Typography variant="body2">&copy; 2023 AuctionHub. All rights reserved.</Typography>
+          <Typography variant="body2">
+            &copy; {new Date().getFullYear()} AuctionHub. All rights reserved.
+          </Typography>
         </Copyright>
       </Container>
     </FooterSection>

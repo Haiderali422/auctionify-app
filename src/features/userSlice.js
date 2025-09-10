@@ -5,14 +5,9 @@ const initialState = {
   email: null,
   displayName: null,
   photo: null,
+  firebase_uid: null,
+  created_at: null,
 };
-const savedUser = JSON.parse(localStorage.getItem('user'));
-if (savedUser) {
-  initialState.id = savedUser.id;
-  initialState.email = savedUser.email;
-  initialState.displayName = savedUser.name || savedUser.displayName;
-  initialState.photo = savedUser.photoURL || savedUser.photo;
-}
 
 const userSlice = createSlice({
   name: 'user',
@@ -20,12 +15,14 @@ const userSlice = createSlice({
   reducers: {
     setUser: (state, action) => {
       state.id = action.payload.id;
+      state.firebase_uid = action.payload.firebase_uid;
       state.email = action.payload.email;
       state.displayName = action.payload.displayName || action.payload.name;
       state.photo = action.payload.photo || action.payload.photoURL;
+      state.created_at = action.payload.created_at;
     },
-    clearUser: (state) => {
-      state.id = null;
+    logout: (state) => {
+      state.firebase_uid = null;
       state.email = null;
       state.displayName = null;
       state.photo = null;
@@ -33,5 +30,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { setUser, clearUser } = userSlice.actions;
+export const { setUser, logout } = userSlice.actions;
 export default userSlice.reducer;

@@ -14,20 +14,16 @@ export const fetchItems = async () => {
   try {
     const response = await api.get('/users/items/added');
     console.log(response);
-
+    console.log('res from fetch', response.data);
     return response.data;
   } catch (error) {
     console.error('Error', error);
   }
 };
 
-export const createItem = async () => {
+export const createItem = async (data) => {
   try {
-    const response = await api.post('/users/items/', {
-      title: 'first Item',
-      description: 'the first created item',
-      image_url: 'https://share.google/images/fFSoHWNcCs9Jj6ona',
-    });
+    const response = await api.post('/users/items/', data);
     console.log(response);
 
     return response.data;
@@ -47,6 +43,17 @@ export const listedItem = async () => {
   }
 };
 
+export const alllistedItem = async () => {
+  try {
+    const response = await api.get('/users/items/listed/all');
+    console.log(response);
+
+    return response.data;
+  } catch (error) {
+    console.error('Error', error);
+  }
+};
+
 export const addItem = async () => {
   try {
     const response = await api.get('/users/items/added');
@@ -57,9 +64,9 @@ export const addItem = async () => {
   }
 };
 
-export const updateItem = async (id, newItem) => {
+export const updateItem = async (id, newData) => {
   try {
-    const response = await api.patch(`/users/items/${id}`, { newItem });
+    const response = await api.patch(`/users/items/${id}`, newData);
     console.log(response);
     return response.data;
   } catch (error) {
@@ -70,16 +77,6 @@ export const updateItem = async (id, newItem) => {
 export const deleteItem = async (id) => {
   try {
     const response = await api.delete(`/users/items/${id}`);
-    console.log(response);
-    return response.data;
-  } catch (error) {
-    console.error('Error', error);
-  }
-};
-
-export const health = async () => {
-  try {
-    const response = await api.get('/health/');
     console.log(response);
     return response.data;
   } catch (error) {

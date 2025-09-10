@@ -1,30 +1,33 @@
 import React, { useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Box } from '@mui/material';
-import { useForm, Controller } from 'react-hook-form';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+} from '@mui/material';
+import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useDispatch, useSelector } from 'react-redux';
-import { createItem, modifyItem } from '../../features/itemSlice';
-import CustomInput from '../../Components/Common/CustomInput';
-import CustomButton from '../../Components/Common/CustomButton';
-import { itemSchema } from '../../Schemas/itemSchema';
+import { addItemSchema } from '../../Schemas/addItemSchema';
+import { addItem, modifyItem, getItems } from '../../features/itemSlice';
 
 const ItemDialog = ({ open, onClose, editingItem }) => {
-  const { id } = useSelector((state) => state.user);
   const dispatch = useDispatch();
+  const { id } = useSelector((state) => state.user);
 
   const {
-    control,
+    register,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(itemSchema),
+    resolver: yupResolver(addItemSchema),
     defaultValues: {
       title: '',
       description: '',
-      price: '',
-      image: '',
-      startingBid: '',
+      image_url: '',
     },
   });
 
@@ -33,115 +36,72 @@ const ItemDialog = ({ open, onClose, editingItem }) => {
       reset({
         title: editingItem.title || '',
         description: editingItem.description || '',
-        price: editingItem.price || '',
-        image: editingItem.image || '',
-        startingBid: editingItem.startingBid || '',
-      });
-    } else {
-      reset({
-        title: '',
-        description: '',
-        price: '',
-        image: '',
-        startingBid: '',
+        image_url: editingItem.image_url || '',
       });
     }
-  }, [editingItem, reset, open]);
+  }, [editingItem, reset]);
 
   const onSubmit = (data) => {
-    const itemData = { ...data, userId: id };
+    let itemData = { ...data, owner_id: id };
+    console.log('itemData', itemData);
+
+    if (itemData.auctionStatus === 'off') {
+      delete itemData.startingBid;
+    }
 
     if (editingItem) {
-      dispatch(modifyItem({ itemId: editingItem.id, itemData }));
+      dispatch(modifyItem({ itemId: editingItem.id, itemData }))
+        .unwrap()
+        .then(() => dispatch(getItems(id)));
     } else {
-      dispatch(createItem(itemData));
+      dispatch(addItem(itemData))
+        .unwrap()
+        .then(() => dispatch(getItems(id)));
     }
 
     onClose();
+    reset();
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{editingItem ? 'Edit Item' : 'Add New Item'}</DialogTitle>
-      <DialogContent>
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ pt: 1 }}>
-          <Controller
-            name="title"
-            control={control}
-            render={({ field }) => (
-              <CustomInput
-                {...field}
-                label="Item Title"
-                error={!!errors.title}
-                helperText={errors.title?.message}
-              />
-            )}
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>{editingItem ? 'Edit Item' : 'Add Item'}</DialogTitle>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <DialogContent>
+          <TextField
+            label="Title"
+            fullWidth
+            margin="normal"
+            {...register('title')}
+            error={!!errors.title}
+            helperText={errors.title?.message}
           />
 
-          <Controller
-            name="description"
-            control={control}
-            render={({ field }) => (
-              <CustomInput
-                {...field}
-                label="Description"
-                multiline
-                rows={3}
-                error={!!errors.description}
-                helperText={errors.description?.message}
-              />
-            )}
+          <TextField
+            label="Description"
+            fullWidth
+            margin="normal"
+            {...register('description')}
+            error={!!errors.description}
+            helperText={errors.description?.message}
           />
-          <Controller
-            name="price"
-            control={control}
-            render={({ field }) => (
-              <CustomInput
-                {...field}
-                label="Price"
-                type="number"
-                error={!!errors.price}
-                helperText={errors.price?.message}
-              />
-            )}
+          <TextField
+            label="Image URL"
+            fullWidth
+            margin="normal"
+            {...register('image_url')}
+            error={!!errors.image}
+            helperText={errors.image?.message}
           />
+        </DialogContent>
 
-          <Controller
-            name="image"
-            control={control}
-            render={({ field }) => (
-              <CustomInput
-                {...field}
-                label="Image URL"
-                error={!!errors.image}
-                helperText={errors.image?.message}
-              />
-            )}
-          />
-          {editingItem && (
-            <Controller
-              name="startingBid"
-              control={control}
-              render={({ field }) => (
-                <CustomInput
-                  {...field}
-                  label="Starting Bid"
-                  type="number"
-                  error={!!errors.startingBid}
-                  helperText={errors.startingBid?.message}
-                />
-              )}
-            />
-          )}
-
-          <DialogActions>
-            <CustomButton onClick={onClose}>Cancel</CustomButton>
-            <CustomButton type="submit" variant="contained">
-              {editingItem ? 'Update' : 'Add'} Item
-            </CustomButton>
-          </DialogActions>
-        </Box>
-      </DialogContent>
+        <DialogActions>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button type="submit" variant="contained" color="primary">
+            {editingItem ? 'Save Changes' : 'Add Item'}
+          </Button>
+        </DialogActions>
+      </form>
     </Dialog>
   );
 };

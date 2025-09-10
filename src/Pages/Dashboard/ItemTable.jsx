@@ -76,7 +76,6 @@ const ItemsTable = ({ items, activeTab, onEditItem, onDeleteItem, onToggleAuctio
                     }}
                   />
                 </TableCell>
-
                 <TableCell>
                   <Typography variant="subtitle2" fontWeight="bold">
                     {item.title}
@@ -90,6 +89,7 @@ const ItemsTable = ({ items, activeTab, onEditItem, onDeleteItem, onToggleAuctio
                       : item.description}
                   </Typography>
                 </TableCell>
+
                 <TableCell>
                   {item.purchased ? (
                     <Chip
@@ -119,6 +119,7 @@ const ItemsTable = ({ items, activeTab, onEditItem, onDeleteItem, onToggleAuctio
                     '-'
                   )}
                 </TableCell>
+
                 <TableCell align="center">
                   <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', flexWrap: 'wrap' }}>
                     <IconButton
