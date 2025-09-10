@@ -21,26 +21,9 @@ export const useAuth = () => {
               refreshToken: firebaseUser.refreshToken,
             })
           );
-
           const response = await getUser();
-          console.log('res from suth', response);
           dispatch(
             setUser({
-              id: response.user.id,
-              email: response.user.email,
-              displayName: response.user.name,
-              photo: response.user.photoURL,
-            })
-          );
-          console.log('user form Auth', {
-            id: response.user.id,
-            email: response.user.email,
-            displayName: response.user.name,
-            photo: response.user.photoURL,
-          });
-          localStorage.setItem(
-            'user',
-            JSON.stringify({
               id: response.user.id,
               email: response.user.email,
               displayName: response.user.name,
