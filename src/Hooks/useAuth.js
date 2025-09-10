@@ -8,6 +8,7 @@ import { getUser } from '../api/auctionApi';
 export const useAuth = () => {
   const dispatch = useDispatch();
   const { tokens } = useSelector((state) => state.auction);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthChange(async (firebaseUser) => {
@@ -43,5 +44,5 @@ export const useAuth = () => {
     return () => unsubscribe();
   }, [dispatch]);
 
-  return { tokens };
+  return { tokens , loading };
 };
