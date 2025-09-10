@@ -3,8 +3,7 @@ import { useSelector } from 'react-redux';
 import { useAuth } from '../../Hooks/useAuth';
 
 const ProtectedRoute = ({ children }) => {
-  const { tokens } = useAuth();
-  const { loading } = useSelector((state) => state.auction);
+  const { tokens, loading } = useAuth();
   const user = localStorage.getItem('user');
 
   if (loading) {
