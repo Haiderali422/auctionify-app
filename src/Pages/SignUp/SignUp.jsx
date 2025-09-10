@@ -7,7 +7,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import CustomInput from '../../Components/Common/CustomInput';
 import CustomButton from '../../Components/Common/CustomButton';
 import { SET_LOADING, SET_TOKENS } from '../../features/auctionSlice';
-import { signupSchema } from '../../Schemas/validation';
+import { signupSchema } from '../../Schemas/signupValidation';
 import { signInWithGoogle, signUpWithEmail } from '../../lib/firebase';
 
 const Signup = () => {
