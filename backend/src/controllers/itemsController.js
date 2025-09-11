@@ -2,130 +2,257 @@ import prisma from "../config/db.js";
 
 export const createItem = async (req, res) => {
   try {
-    const { title, description, image_url } = req.body;
+    const { title, description, imageUrl } = req.body;
 
-    if (!title || !image_url || !description) {
-      return res
-        .status(400)
-        .json({ error: "title, description and image_url are required" });
+    if (!title || !description || !imageUrl) {
+      return res.status(400).json({
+        success: false,
+        message: "title, description, and imageUrl are required",
+      });
     }
 
     const user = await prisma.user.findUnique({
-      where: { firebase_uid: req.user.uid },
+      where: { firebaseUid: req.user.uid },
     });
 
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
 
     const newItem = await prisma.item.create({
       data: {
         title,
         description,
-        image_url,
-        auction_enabled: false,
-        owner_id: user.id,
+        imageUrl,
+        auctionEnabled: false,
+        ownerUid: user.firebaseUid,
       },
       include: { owner: true },
     });
 
-    res.status(201).json(newItem);
+    return res.status(201).json({
+      success: true,
+      message: "Item created successfully",
+      data: {
+        itemId: newItem.id,
+        title: newItem.title,
+        description: newItem.description,
+        imageUrl: newItem.imageUrl,
+        auctionEnabled: newItem.auctionEnabled,
+        ownerUid: newItem.ownerUid,
+      },
+    });
   } catch (error) {
     console.error("Error creating item:", error);
-    res.status(500).json({ error: "Failed to create item" });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to create item",
+      error: error.message,
+    });
   }
 };
 
 export const getAddedItems = async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
-      where: { firebase_uid: req.user.uid },
+      where: { firebaseUid: req.user.uid },
     });
 
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
 
     const items = await prisma.item.findMany({
-      where: { owner_id: user.id, auction_enabled: false },
+      where: {
+        ownerUid: user.firebaseUid,
+        auctionEnabled: false,
+      },
       include: { owner: true },
     });
+    if (!items || items.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No listed items found",
+        data: [],
+      });
+    }
 
-    res.json(items);
+    return res.status(200).json({
+      success: true,
+      message: "Items fetched successfully",
+      data: items.map((item) => ({
+        itemId: item.id,
+        title: item.title,
+        description: item.description,
+        imageUrl: item.imageUrl,
+        auctionEnabled: item.auctionEnabled,
+        ownerUid: item.ownerUid,
+      })),
+    });
   } catch (error) {
     console.error("Error fetching added items:", error);
-    res.status(500).json({ error: "Failed to fetch added items" });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch added items",
+      error: error.message,
+    });
   }
 };
 
 export const getListedItems = async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
-      where: { firebase_uid: req.user.uid },
+      where: { firebaseUid: req.user.uid },
     });
 
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
 
     const items = await prisma.item.findMany({
-      where: { owner_id: user.id, auction_enabled: true },
+      where: {
+        ownerUid: user.firebaseUid,
+        auctionEnabled: true,
+      },
       include: { owner: true },
     });
 
-    res.json(items);
+    if (!items || items.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No listed items found",
+        data: [],
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Listed items fetched successfully",
+      data: items.map((item) => ({
+        itemId: item.id,
+        title: item.title,
+        description: item.description,
+        imageUrl: item.imageUrl,
+        auctionEnabled: item.auctionEnabled,
+        ownerUid: item.ownerUid,
+      })),
+    });
   } catch (error) {
     console.error("Error fetching listed items:", error);
-    res.status(500).json({ error: "Failed to fetch listed items" });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch listed items",
+      error: error.message,
+    });
   }
 };
+
+
 export const getAllListedItems = async (req, res) => {
   try {
     const items = await prisma.item.findMany({
-      where: { auction_enabled: true },
-      include: { owner: true }, // still include owner details
+      where: { auctionEnabled: true },
+      include: { owner: true },
     });
+    if (!items || items.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No listed items found",
+        data: [],
+      });
+    }
 
-    res.json(items);
+    return res.status(200).json({
+      success: true,
+      message: "All listed items fetched successfully",
+      data: items.map((item) => ({
+        itemId: item.id,
+        title: item.title,
+        description: item.description,
+        imageUrl: item.imageUrl,
+        auctionEnabled: item.auctionEnabled,
+        ownerUid: item.ownerUid,
+      })),
+    });
   } catch (error) {
     console.error("Error fetching all listed items:", error);
-    res.status(500).json({ error: "Failed to fetch all listed items" });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch all listed items",
+      error: error.message,
+    });
   }
 };
 
 export const updateItem = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, image_url, auction_enabled } = req.body;
+    const { title, description, imageUrl, auctionEnabled } = req.body;
 
     const user = await prisma.user.findUnique({
-      where: { firebase_uid: req.user.uid },
+      where: { firebaseUid: req.user.uid },
     });
 
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
 
     const item = await prisma.item.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: parseInt(id, 10) },
     });
 
-    if (!item || item.owner_id !== user.id) {
-      return res
-        .status(403)
-        .json({ error: "Not authorized to update this item" });
+    if (!item || item.ownerUid !== user.firebaseUid) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to update this item",
+      });
     }
 
     const updatedItem = await prisma.item.update({
-      where: { id: parseInt(id) },
+      where: { id: parseInt(id, 10) },
       data: {
         title: title ?? item.title,
         description: description ?? item.description,
-        image_url: image_url ?? item.image_url,
-        auction_enabled:
-          typeof auction_enabled === "boolean"
-            ? auction_enabled
-            : item.auction_enabled,
+        imageUrl: imageUrl ?? item.imageUrl,
+        auctionEnabled:
+          typeof auctionEnabled === "boolean"
+            ? auctionEnabled
+            : item.auctionEnabled,
       },
       include: { owner: true },
     });
 
-    res.json(updatedItem);
+    return res.status(200).json({
+      success: true,
+      message: "Item updated successfully",
+      data: {
+        itemId: updatedItem.id,
+        title: updatedItem.title,
+        description: updatedItem.description,
+        imageUrl: updatedItem.imageUrl,
+        auctionEnabled: updatedItem.auctionEnabled,
+        ownerUid: updatedItem.ownerUid,
+      },
+    });
   } catch (error) {
     console.error("Error updating item:", error);
-    res.status(500).json({ error: "Failed to update item" });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update item",
+      error: error.message,
+    });
   }
 };
 
@@ -134,26 +261,40 @@ export const deleteItem = async (req, res) => {
     const { id } = req.params;
 
     const user = await prisma.user.findUnique({
-      where: { firebase_uid: req.user.uid },
+      where: { firebaseUid: req.user.uid },
     });
 
-    if (!user) return res.status(404).json({ error: "User not found" });
-
-    const item = await prisma.item.findUnique({
-      where: { id: parseInt(id) },
-    });
-
-    if (!item || item.owner_id !== user.id) {
-      return res
-        .status(403)
-        .json({ error: "Not authorized to delete this item" });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
-    await prisma.item.delete({ where: { id: parseInt(id) } });
+    const item = await prisma.item.findUnique({
+      where: { id: parseInt(id, 10) },
+    });
 
-    res.json({ message: "Item deleted successfully" });
+    if (!item || item.ownerUid !== user.firebaseUid) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to delete this item",
+      });
+    }
+
+    await prisma.item.delete({ where: { id: parseInt(id, 10) } });
+
+    return res.status(200).json({
+      success: true,
+      message: "Item deleted successfully",
+      data: { itemId: parseInt(id, 10) },
+    });
   } catch (error) {
     console.error("Error deleting item:", error);
-    res.status(500).json({ error: "Failed to delete item" });
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete item",
+      error: error.message,
+    });
   }
 };

@@ -6,75 +6,76 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 model User {
-id Int @id @default(autoincrement())
-firebase_uid String @unique
-email String
-name String?
-photoURL String?
-created_at DateTime @default(now())
+  firebaseUid  String   @id
+  email        String
+  name         String?
+  photoUrl     String?
+  createdAt    DateTime @default(now())
 
-items Item[]
-bids Bid[]
-payments Payment[]
-auctionsWon Auction[] @relation("AuctionWinner")
+  items        Item[]
+  bids         Bid[]
+  payments     Payment[]
+  auctionsWon  Auction[] @relation("AuctionWinner")
 }
 
-model Item{
-id Int @id @default(autoincrement())
-title String
-description String?
-image_url String?
-auction_enabled Boolean @default(false)
-create_at DateTime @default(now())
+model Item {
+  id            Int      @id @default(autoincrement())
+  title         String
+  description   String?
+  imageUrl      String?
+  auctionEnabled Boolean  @default(false)
+  createdAt     DateTime @default(now())
 
-owner_id Int
-owner User @relation(fields: [owner_id], references: [id])
-aution Auction?
+  ownerUid      String
+  owner         User @relation(fields: [ownerUid], references: [firebaseUid])
+
+  auction       Auction?
 }
 
-model Auction{
-id Int @id @default(autoincrement())
-starting_bid Float
-end_at DateTime
-is_closed Boolean
+model Auction {
+  id          Int      @id @default(autoincrement())
+  startingBid Float
+  endAt       DateTime
+  isClosed    Boolean
 
-item Item @relation(fields: [item_id],references: [id])
-item_id Int @unique
-bids Bid[]
-winner User? @relation("AuctionWinner", fields:[winner_id], references: [id])
-winner_id Int?
-payment Payment?
+  item        Item   @relation(fields: [itemId], references: [id])
+  itemId      Int    @unique
+  bids        Bid[]
+  winner      User?  @relation("AuctionWinner", fields: [winnerUid], references: [firebaseUid])
+  winnerUid   String?
+  payment     Payment?
 }
 
-model Bid{
-id Int @id @default(autoincrement())
-amount Float
-created_at DateTime @default(now())
+model Bid {
+  id        Int      @id @default(autoincrement())
+  amount    Float
+  createdAt DateTime @default(now())
 
-auction Auction @relation(fields: [auction_id], references: [id])
-auction_id Int
-user User @relation(fields: [user_id],references: [id])
-user_id Int
+  auction   Auction @relation(fields: [auctionId], references: [id])
+  auctionId Int
+
+  userUid   String
+  user      User @relation(fields: [userUid], references: [firebaseUid])
 }
 
+model Payment {
+  id              Int      @id @default(autoincrement())
+  amountCents     Float
+  status          PaymentStatus
+  stripePaymentId String   @unique
+  createdAt       DateTime @default(now())
 
-model Payment{
-id Int @id @default(autoincrement())
-amount Float
-status PaymentStatus
-stripe_payment_id String @unique
-created_at DateTime @default(now())
+  auctionId Int     @unique
+  auction   Auction @relation(fields: [auctionId], references: [id])
 
-auction_id Int @unique
-auction Auction @relation(fields: [auction_id],references: [id])
-user_id Int
-user User @relation(fields: [user_id],references: [id])
+  userUid   String
+  user      User @relation(fields: [userUid], references: [firebaseUid])
 }
 
-enum PaymentStatus{
+enum PaymentStatus {
   PENDING
   SUCCESS
   FAILED
 }
-

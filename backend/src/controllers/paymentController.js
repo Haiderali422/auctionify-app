@@ -1,28 +1,39 @@
 import prisma from "../config/db.js";
 import stripe from "../config/stripe.js";
+import { PaymentStatus } from "@prisma/client";
 
 export const createCheckoutSession = async (req, res) => {
   try {
-    const { auction_id } = req.body;
-    if (!auction_id) {
-      return res.status(400).json({ error: "auction_id is required" });
+    const { auctionId, successUrl, cancelUrl } = req.body;
+
+    if (!auctionId) {
+      return res.status(400).json({
+        success: false,
+        message: "auctionId is required",
+      });
     }
 
     const authUid = req.user?.uid;
     if (!authUid) {
-      return res.status(401).json({ error: "Unauthorized" });
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
     }
 
     const user = await prisma.user.findUnique({
-      where: { firebase_uid: authUid },
+      where: { firebaseUid: authUid },
     });
 
     if (!user) {
-      return res.status(404).json({ error: "User not found in DB" });
+      return res.status(404).json({
+        success: false,
+        message: "User not found in DB",
+      });
     }
 
     const auction = await prisma.auction.findUnique({
-      where: { id: Number(auction_id) },
+      where: { id: Number(auctionId) },
       include: {
         item: true,
         bids: { orderBy: { amount: "desc" }, take: 1 },
@@ -30,21 +41,36 @@ export const createCheckoutSession = async (req, res) => {
     });
 
     if (!auction) {
-      return res.status(404).json({ error: "Auction not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Auction not found",
+      });
     }
 
-    if (!auction.is_closed) {
-      return res.status(400).json({ error: "Auction is not closed yet" });
+    if (!auction.isClosed) {
+      return res.status(400).json({
+        success: false,
+        message: "Auction is not closed yet",
+      });
     }
-    if (!auction.winner_id || auction.winner_id !== user.id) {
-      return res
-        .status(403)
-        .json({ error: "You are not the winner of this auction" });
+
+    if (!auction.winnerUid || auction.winnerUid !== user.firebaseUid) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not the winner of this auction",
+      });
+    }
+
+    if (auction.bids.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No bids placed. No payment session required.",
+      });
     }
 
     const highestBid = auction.bids[0];
-    const amount = highestBid ? highestBid.amount : auction.starting_bid;
-    const unitAmountCents = Math.round(Number(amount) * 100);
+    const amount = highestBid.amount;
+    const amountCents = Math.round(Number(amount) * 100);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -56,37 +82,48 @@ export const createCheckoutSession = async (req, res) => {
             product_data: {
               name: auction.item?.title || `Auction #${auction.id}`,
               description: auction.item?.description || "Auction item",
-              images: auction.item?.image_url ? [auction.item.image_url] : [],
+              images: auction.item?.imageUrl ? [auction.item.imageUrl] : [],
             },
-            unit_amount: unitAmountCents,
+            unit_amount: amountCents,
           },
           quantity: 1,
         },
       ],
-      success_url: process.env.FRONTEND_SUCCESS_URL,
-      cancel_url: process.env.FRONTEND_CANCEL_URL,
+      success_url: successUrl || process.env.FRONTEND_SUCCESS_URL,
+      cancel_url: cancelUrl || process.env.FRONTEND_CANCEL_URL,
     });
 
     await prisma.payment.upsert({
-      where: { auction_id: auction.id },
+      where: { auctionId: auction.id },
       update: {
-        amount: amount,
-        status: "PENDING",
-        stripe_payment_id: session.id,
-        user_id: user.id,
+        amountCents,
+        status: PaymentStatus.PENDING,
+        stripePaymentId: session.id,
+        userUid: user.firebaseUid,
       },
       create: {
-        amount: amount,
-        status: "PENDING",
-        stripe_payment_id: session.id,
-        auction_id: auction.id,
-        user_id: user.id,
+        amountCents,
+        status: PaymentStatus.PENDING,
+        stripePaymentId: session.id,
+        auctionId: auction.id,
+        userUid: user.firebaseUid,
       },
     });
 
-    return res.json({ sessionId: session.id, url: session.url });
-  } catch (err) {
-    console.error("Error creating checkout session:", err);
-    return res.status(500).json({ error: "Failed to create checkout session" });
+    return res.status(200).json({
+      success: true,
+      message: "Checkout session created successfully",
+      data: {
+        sessionId: session.id,
+        url: session.url,
+      },
+    });
+  } catch (error) {
+    console.error("Error creating checkout session:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to create checkout session",
+      error: error.message,
+    });
   }
 };
