@@ -26,7 +26,10 @@ export const placeBid = async (req, res) => {
     const result = await prisma.$transaction(async (tx) => {
       const auction = await tx.auction.findUnique({
         where: { id: parseInt(id, 10) },
-        include: { bids: { orderBy: { amount: "desc" } } },
+        include: {
+          bids: { orderBy: { amount: "desc" } },
+          item: true,
+        },
       });
 
       if (!auction) {
@@ -37,6 +40,15 @@ export const placeBid = async (req, res) => {
       }
       if (new Date() > auction.endAt) {
         return { error: { status: 400, message: "Auction has already ended" } };
+      }
+
+      if (auction.item.ownerUid === user.firebaseUid) {
+        return {
+          error: {
+            status: 403,
+            message: "You cannot place a bid on your own item",
+          },
+        };
       }
 
       const highestBid =

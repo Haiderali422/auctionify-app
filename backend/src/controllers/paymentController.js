@@ -5,20 +5,13 @@ import { PaymentStatus } from "@prisma/client";
 export const createCheckoutSession = async (req, res) => {
   try {
     const { auctionId, successUrl, cancelUrl } = req.body;
-
     if (!auctionId) {
-      return res.status(400).json({
-        success: false,
-        message: "auctionId is required",
-      });
+      return res.status(400).json({ error: "auctionId is required" });
     }
 
     const authUid = req.user?.uid;
     if (!authUid) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized",
-      });
+      return res.status(401).json({ error: "Unauthorized" });
     }
 
     const user = await prisma.user.findUnique({
@@ -26,10 +19,7 @@ export const createCheckoutSession = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found in DB",
-      });
+      return res.status(404).json({ error: "User not found in DB" });
     }
 
     const auction = await prisma.auction.findUnique({
@@ -41,36 +31,28 @@ export const createCheckoutSession = async (req, res) => {
     });
 
     if (!auction) {
-      return res.status(404).json({
-        success: false,
-        message: "Auction not found",
-      });
+      return res.status(404).json({ error: "Auction not found" });
     }
 
     if (!auction.isClosed) {
-      return res.status(400).json({
-        success: false,
-        message: "Auction is not closed yet",
-      });
+      return res.status(400).json({ error: "Auction is not closed yet" });
     }
 
     if (!auction.winnerUid || auction.winnerUid !== user.firebaseUid) {
-      return res.status(403).json({
-        success: false,
-        message: "You are not the winner of this auction",
-      });
-    }
-
-    if (auction.bids.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "No bids placed. No payment session required.",
-      });
+      return res
+        .status(403)
+        .json({ error: "You are not the winner of this auction" });
     }
 
     const highestBid = auction.bids[0];
+    if (!highestBid) {
+      return res
+        .status(400)
+        .json({ error: "Auction has no bids. Nothing to pay." });
+    }
+
     const amount = highestBid.amount;
-    const amountCents = Math.round(Number(amount) * 100);
+    const unitAmountCents = Math.round(Number(amount) * 100);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -84,11 +66,14 @@ export const createCheckoutSession = async (req, res) => {
               description: auction.item?.description || "Auction item",
               images: auction.item?.imageUrl ? [auction.item.imageUrl] : [],
             },
-            unit_amount: amountCents,
+            unit_amount: unitAmountCents,
           },
           quantity: 1,
         },
       ],
+      metadata: {
+        auctionId: auction.id.toString(),
+      },
       success_url: successUrl || process.env.FRONTEND_SUCCESS_URL,
       cancel_url: cancelUrl || process.env.FRONTEND_CANCEL_URL,
     });
@@ -96,13 +81,13 @@ export const createCheckoutSession = async (req, res) => {
     await prisma.payment.upsert({
       where: { auctionId: auction.id },
       update: {
-        amountCents,
+        amountCents: unitAmountCents,
         status: PaymentStatus.PENDING,
         stripePaymentId: session.id,
         userUid: user.firebaseUid,
       },
       create: {
-        amountCents,
+        amountCents: unitAmountCents,
         status: PaymentStatus.PENDING,
         stripePaymentId: session.id,
         auctionId: auction.id,
@@ -110,20 +95,9 @@ export const createCheckoutSession = async (req, res) => {
       },
     });
 
-    return res.status(200).json({
-      success: true,
-      message: "Checkout session created successfully",
-      data: {
-        sessionId: session.id,
-        url: session.url,
-      },
-    });
-  } catch (error) {
-    console.error("Error creating checkout session:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to create checkout session",
-      error: error.message,
-    });
+    return res.json({ sessionId: session.id, url: session.url });
+  } catch (err) {
+    console.error("Error creating checkout session:", err);
+    return res.status(500).json({ error: "Failed to create checkout session" });
   }
 };
