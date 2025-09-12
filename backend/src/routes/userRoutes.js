@@ -1,8 +1,10 @@
 import express from "express";
 import { verifyFirebaseToken } from "../middlewares/firebaseAuth.js";
-import { saveUserProfile } from "../controllers/userController.js";
-import { updateUserProfile } from "../controllers/userController.js";
-import { getUserProfile } from "../controllers/userController.js";
+import {
+  saveUserProfile,
+  updateUserProfile,
+  getUserProfile,
+} from "../controllers/userController.js";
 
 const router = express.Router();
 

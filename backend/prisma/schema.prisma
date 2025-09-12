@@ -41,7 +41,7 @@ model Auction {
   isClosed    Boolean
 
   item        Item   @relation(fields: [itemId], references: [id])
-  itemId      Int    @unique
+  itemId      Int   @unique
   bids        Bid[]
   winner      User?  @relation("AuctionWinner", fields: [winnerUid], references: [firebaseUid])
   winnerUid   String?

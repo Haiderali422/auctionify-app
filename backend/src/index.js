@@ -8,7 +8,7 @@ import itemRoutes from "./routes/itemRoutes.js";
 import auctionRoutes from "./routes/auctionRoutes.js";
 import bidRoutes from "./routes/bidRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
-
+import stripeWebhookRoutes from "./routes/stripeWebhook.js";
 import "./workers/auctionWorker.js";
 
 const app = express();
@@ -20,7 +20,7 @@ app.use(
     credentials: true,
   })
 );
-
+app.use("/api", stripeWebhookRoutes);
 app.use(express.json());
 
 app.use("/health", healthRoutes);
