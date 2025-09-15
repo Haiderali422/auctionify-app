@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  firebaseUid  String   @id
+  email        String
+  name         String?
+  photoUrl     String?
+  createdAt    DateTime @default(now())
+
+  items        Item[]
+  bids         Bid[]
+  payments     Payment[]
+  auctionsWon  Auction[] @relation("AuctionWinner")
+}
+
+model Item {
+  id            Int      @id @default(autoincrement())
+  title         String
+  description   String?
+  imageUrl      String?
+  auctionEnabled Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  ownerUid      String
+  owner         User @relation(fields: [ownerUid], references: [firebaseUid])
+
+  auction       Auction?
+}
+
+model Auction {
+  id          Int      @id @default(autoincrement())
+  startingBid Float
+  endAt       DateTime
+  isClosed    Boolean
+
+  item        Item   @relation(fields: [itemId], references: [id])
+  itemId      Int    @unique
+  bids        Bid[]
+  winner      User?  @relation("AuctionWinner", fields: [winnerUid], references: [firebaseUid])
+  winnerUid   String?
+  payment     Payment?
+}
+
+model Bid {
+  id        Int      @id @default(autoincrement())
+  amount    Float
+  createdAt DateTime @default(now())
+
+  auction   Auction @relation(fields: [auctionId], references: [id])
+  auctionId Int
+
+  userUid   String
+  user      User @relation(fields: [userUid], references: [firebaseUid])
+}
+
+model Payment {
+  id              Int      @id @default(autoincrement())
+  amountCents     Float
+  status          PaymentStatus
+  stripePaymentId String   @unique
+  createdAt       DateTime @default(now())
+
+  auctionId Int     @unique
+  auction   Auction @relation(fields: [auctionId], references: [id])
+
+  userUid   String
+  user      User @relation(fields: [userUid], references: [firebaseUid])
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
