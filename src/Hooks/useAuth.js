@@ -1,13 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { onAuthChange } from '../lib/firebase';
 import { SET_TOKENS, CLEAR_AUTH } from '../features/auctionSlice';
-import { setUser, clearUser } from '../features/userSlice';
+import { setUser, Logout } from '../features/userSlice';
 import { getUser } from '../api/auctionApi';
-
 export const useAuth = () => {
   const dispatch = useDispatch();
   const { tokens } = useSelector((state) => state.auction);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthChange(async (firebaseUser) => {
@@ -23,28 +23,15 @@ export const useAuth = () => {
           );
 
           const response = await getUser();
-          console.log('res from suth', response);
+          console.log('res from auth', response);
+
           dispatch(
             setUser({
-              id: response.user.id,
-              email: response.user.email,
-              displayName: response.user.name,
-              photo: response.user.photoURL,
-            })
-          );
-          console.log('user form Auth', {
-            id: response.user.id,
-            email: response.user.email,
-            displayName: response.user.name,
-            photo: response.user.photoURL,
-          });
-          localStorage.setItem(
-            'user',
-            JSON.stringify({
-              id: response.user.id,
-              email: response.user.email,
-              displayName: response.user.name,
-              photo: response.user.photoURL,
+              email: response.data.email,
+              displayName: response.data.name,
+              photo: response.data.photoUrl,
+              firebase_uid: response.data.firebaseUid,
+              created_at: response.data.createdAt,
             })
           );
         } catch (error) {
@@ -52,13 +39,13 @@ export const useAuth = () => {
         }
       } else {
         dispatch(CLEAR_AUTH());
-        dispatch(clearUser());
-        localStorage.removeItem('user');
+        dispatch(Logout());
       }
+      setLoading(false);
     });
 
     return () => unsubscribe();
   }, [dispatch]);
 
-  return { tokens };
+  return { tokens, loading };
 };

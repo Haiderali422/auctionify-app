@@ -1,19 +1,31 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import { Container, Paper, Typography, Box, Alert, CircularProgress } from '@mui/material';
+import {
+  Container,
+  Paper,
+  Typography,
+  Box,
+  Alert,
+  CircularProgress,
+  InputAdornment,
+  IconButton,
+} from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import CustomInput from '../../Components/Common/CustomInput';
 import CustomButton from '../../Components/Common/CustomButton';
 import { SET_LOADING, SET_TOKENS } from '../../features/auctionSlice';
-import { signupSchema } from '../../Schemas/validation';
+import { signupSchema } from '../../Schemas/signupSchema';
 import { signInWithGoogle, signUpWithEmail } from '../../lib/firebase';
+import eyeIcon from '../../assets/images/iconoir_eye (1).png';
 
 const Signup = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading } = useSelector((state) => state.auction);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setConfirmPassword] = useState(false);
   const [error, setError] = useState('');
 
   const {
@@ -81,6 +93,12 @@ const Signup = () => {
       dispatch(SET_LOADING(false));
     }
   };
+  const handleTogglePassword = () => {
+    setShowPassword((prev) => !prev);
+  };
+  const handleConfirmPassword = () => {
+    setConfirmPassword((prev) => !prev);
+  };
 
   return (
     <Container component="main" maxWidth="sm">
@@ -120,23 +138,45 @@ const Signup = () => {
 
             <CustomInput
               label="Password"
-              type="password"
+              type={showPassword ? 'password' : 'text'}
               autoComplete="new-password"
               {...register('password')}
               error={!!errors.password}
               helperText={errors.password?.message}
               sx={{ mb: 2 }}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={handleTogglePassword} edge="end">
+                        <img src={eyeIcon} alt={eyeIcon} />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
               fullWidth
             />
 
             <CustomInput
               label="Confirm Password"
-              type="password"
+              type={showConfirmPassword ? 'password' : 'text'}
               autoComplete="new-password"
               {...register('confirmPassword')}
               error={!!errors.confirmPassword}
               helperText={errors.confirmPassword?.message}
               sx={{ mb: 2 }}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={handleConfirmPassword} edge="end">
+                        <img src={eyeIcon} alt={eyeIcon} />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
               fullWidth
             />
 

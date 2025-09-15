@@ -27,6 +27,7 @@ export default [
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
       prettier: prettierPlugin,
+      'no-comments': noComments,
     },
     rules: {
       ...js.configs.recommended.rules,
@@ -37,6 +38,7 @@ export default [
       'prettier/prettier': 'error',
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
+      'no-comments/disallowComments': ['error', { line: true, block: true }],
     },
     settings: {
       react: {

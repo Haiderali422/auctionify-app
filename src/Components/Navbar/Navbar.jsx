@@ -22,23 +22,46 @@ import {
   Info as InfoIcon,
   Person as PersonIcon,
   PersonAdd as PersonAddIcon,
+  Logout as LogoutIcon,
 } from '@mui/icons-material';
+import { useSelector, useDispatch } from 'react-redux';
+import { Logout } from '../../features/userSlice';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import CustomButton from '../Common/CustomButton';
+import { CLEAR_AUTH } from '../../features/auctionSlice';
+import { persistor } from '../../app/store';
+import { logOut } from '../../lib/firebase';
 
 const AuctionNavbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { firebase_uid } = useSelector((state) => state.user);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      dispatch(Logout());
+      dispatch(CLEAR_AUTH());
+      persistor.purge();
+      localStorage.clear();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
   const menuItems = [
-    { text: 'Home', icon: <HomeIcon />, href: '#' },
-    { text: 'Live Auctions', icon: <LiveIcon />, href: '#' },
-    { text: 'Categories', icon: <CategoryIcon />, href: '#' },
-    { text: 'How It Works', icon: <InfoIcon />, href: '#' },
+    { text: 'Home', icon: <HomeIcon />, to: '/' },
+    { text: 'Live Auctions', icon: <LiveIcon />, to: '/liveauction' },
+    { text: 'Categories', icon: <CategoryIcon />, to: '/categories' },
+    { text: 'How It Works', icon: <InfoIcon />, to: '/how-it-works' },
   ];
 
   const drawer = (
@@ -49,10 +72,13 @@ const AuctionNavbar = () => {
           Auctioni<span style={{ color: '#F72585' }}>fy</span>
         </Typography>
       </Box>
+
       <List>
         {menuItems.map((item) => (
-          <ListItem key={item.text} component="a" href={item.href} disablePadding>
+          <ListItem key={item.text} disablePadding>
             <Button
+              component={Link}
+              to={item.to}
               fullWidth
               sx={{
                 px: 3,
@@ -70,49 +96,93 @@ const AuctionNavbar = () => {
             </Button>
           </ListItem>
         ))}
-        <ListItem disablePadding>
-          <Button
-            fullWidth
-            component={Link}
-            to="/signup"
-            sx={{
-              justifyContent: 'flex-start',
-              px: 2,
-              py: 1,
-              mt: 1,
-              border: '2px solid',
-              borderColor: 'primary.main',
-              color: 'primary.main',
-              '&:hover': {
-                backgroundColor: 'primary.main',
-                color: 'white',
-              },
-            }}
-            startIcon={<PersonIcon />}
-          >
-            Sign In
-          </Button>
-        </ListItem>
-        <ListItem disablePadding>
-          <Button
-            fullWidth
-            onClick={() => navigate('/signup')}
-            sx={{
-              justifyContent: 'flex-start',
-              px: 2,
-              py: 1,
-              mt: 1,
-              backgroundColor: 'primary.main',
-              color: 'white',
-              '&:hover': {
-                backgroundColor: 'primary.dark',
-              },
-            }}
-            startIcon={<PersonAddIcon />}
-          >
-            Register
-          </Button>
-        </ListItem>
+
+        {firebase_uid ? (
+          <>
+            <ListItem disablePadding>
+              <CustomButton
+                fullWidth
+                startIcon={<DashboardIcon />}
+                onClick={() => navigate('/dashboard')}
+                sx={{
+                  mt: 1,
+                  justifyContent: 'flex-start',
+                  backgroundColor: 'primary.main',
+                  '&:hover': { backgroundColor: 'primary.dark' },
+                }}
+              >
+                Dashboard
+              </CustomButton>
+            </ListItem>
+
+            <ListItem disablePadding>
+              <Button
+                fullWidth
+                onClick={handleLogout}
+                sx={{
+                  justifyContent: 'flex-start',
+                  px: 2,
+                  py: 1,
+                  mt: 1,
+                  backgroundColor: 'error.main',
+                  color: 'white',
+                  '&:hover': {
+                    backgroundColor: 'error.dark',
+                  },
+                }}
+                startIcon={<LogoutIcon />}
+              >
+                Logout
+              </Button>
+            </ListItem>
+          </>
+        ) : (
+          <>
+            <ListItem disablePadding>
+              <Button
+                fullWidth
+                component={Link}
+                to="/login"
+                sx={{
+                  justifyContent: 'flex-start',
+                  px: 2,
+                  py: 1,
+                  mt: 1,
+                  border: '2px solid',
+                  borderColor: 'primary.main',
+                  color: 'primary.main',
+                  '&:hover': {
+                    backgroundColor: 'primary.main',
+                    color: 'white',
+                  },
+                }}
+                startIcon={<PersonIcon />}
+              >
+                Sign In
+              </Button>
+            </ListItem>
+            <ListItem disablePadding>
+              <Button
+                fullWidth
+                onClick={() => navigate('/signup')}
+                sx={{
+                  justifyContent: 'flex-start',
+                  px: 2,
+                  py: 1,
+                  mt: 1,
+                  backgroundColor: 'primary.main',
+                  color: 'white',
+                  '&:hover': {
+                    backgroundColor: 'primary.dark',
+                  },
+                }}
+                startIcon={<PersonAddIcon />}
+              >
+                Register
+              </Button>
+            </ListItem>
+          </>
+        )}
       </List>
     </Box>
   );
@@ -154,6 +224,8 @@ const AuctionNavbar = () => {
               {menuItems.map((item) => (
                 <Button
                   key={item.text}
+                  component={Link}
+                  to={item.to}
                   color="inherit"
                   startIcon={item.icon}
                   sx={{
@@ -179,13 +251,44 @@ const AuctionNavbar = () => {
               >
                 <MenuIcon />
               </IconButton>
+            ) : firebase_uid ? (
+              <>
+                <CustomButton
+                  startIcon={<DashboardIcon />}
+                  onClick={() => navigate('/dashboard')}
+                  sx={{
+                    fontWeight: 600,
+                    background: 'linear-gradient(135deg, #3A0CA3 0%, #4361EE 100%)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #2c0880 0%, #3A0CA3 100%)',
+                    },
+                  }}
+                >
+                  Dashboard
+                </CustomButton>
+
+                <Button
+                  variant="contained"
+                  startIcon={<LogoutIcon />}
+                  onClick={handleLogout}
+                  sx={{
+                    fontWeight: 600,
+                    backgroundColor: 'error.main',
+                    '&:hover': {
+                      backgroundColor: 'error.dark',
+                    },
+                  }}
+                >
+                  Logout
+                </Button>
+              </>
             ) : (
               <>
                 <Button
                   color="inherit"
                   component={Link}
                   to="/login"
-                  startIcon={<PersonIcon />} // Show icon on desktop
+                  startIcon={<PersonIcon />}
                   sx={{
                     fontWeight: 400,
                     border: '2px solid',
@@ -219,7 +322,6 @@ const AuctionNavbar = () => {
           </Box>
         </Toolbar>
       </AppBar>
-
       <Drawer
         variant="temporary"
         open={mobileOpen}

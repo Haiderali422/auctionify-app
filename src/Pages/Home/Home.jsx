@@ -7,10 +7,8 @@ import HowItWorks from '../../Components/HowItWorks/HowItWorks';
 const Home = () => {
   return (
     <div>
-      <Navbar />
       <Hero />
       <HowItWorks />
-      <Footer />
     </div>
   );
 };

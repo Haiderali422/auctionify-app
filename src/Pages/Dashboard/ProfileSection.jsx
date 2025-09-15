@@ -24,10 +24,8 @@ import {
 } from '@mui/icons-material';
 
 const ProfileSection = ({ onBack }) => {
-  const { displayName, email } = useSelector((state) => state.user);
-  console.log(displayName);
-  console.log(email);
-
+  const user = useSelector((state) => state.user);
+  const { displayName, email } = user;
   return (
     <Card sx={{ mb: 3, borderRadius: 2 }}>
       <CardContent>
@@ -41,11 +39,11 @@ const ProfileSection = ({ onBack }) => {
           </Avatar>
           <Box>
             <Typography variant="h5" gutterBottom>
-              {displayName || 'User Name'}
+              {typeof displayName === 'string' ? displayName : 'User Name'}
             </Typography>
             <Typography variant="body2" color="textSecondary" gutterBottom>
               <EmailIcon sx={{ fontSize: 16, verticalAlign: 'text-bottom', mr: 1 }} />
-              {email || 'user@example.com'}
+              {typeof email === 'string' ? email : 'user@example.com'}
             </Typography>
             <Typography variant="body2" color="textSecondary">
               Member since {'January 2023'}

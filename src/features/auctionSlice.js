@@ -29,7 +29,6 @@ export const auctionSlice = createSlice({
     },
     SET_TOKENS: (state, action) => {
       state.tokens = action.payload;
-      // Store tokens in localStorage
       if (action.payload.accessToken) {
         localStorage.setItem('accessToken', action.payload.accessToken);
       }
@@ -38,16 +37,13 @@ export const auctionSlice = createSlice({
       }
     },
     CLEAR_AUTH: (state) => {
-      state.user = null;
       state.tokens = {
         accessToken: null,
         refreshToken: null,
       };
-      // Clear tokens from localStorage
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('firebaseUser');
-      localStorage.removeItem('user');
     },
   },
 });

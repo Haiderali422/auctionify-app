@@ -1,52 +1,67 @@
 import React from 'react';
-import { Box, Container, Typography, Grid, Paper } from '@mui/material';
+import { Box, Container, Typography, Paper } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 const Section = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(8, 0),
+  padding: theme.spacing(6, 0),
   backgroundColor: theme.palette.background.default,
 }));
 
 const SectionTitle = styled(Typography)(({ theme }) => ({
   textAlign: 'center',
-  marginBottom: theme.spacing(6),
+  marginBottom: theme.spacing(4),
   position: 'relative',
   '&:after': {
     content: '""',
     display: 'block',
-    width: '60px',
-    height: '4px',
-    background: theme.palette.background.paper,
+    width: 60,
+    height: 4,
+    background: theme.palette.error.light,
     margin: '0.5rem auto',
-    borderRadius: '2px',
+    borderRadius: 2,
   },
 }));
 
+const GridWrap = styled(Box)(({ theme }) => ({
+  display: 'grid',
+  gap: theme.spacing(3),
+  gridTemplateColumns: '1fr',
+  [theme.breakpoints.up('sm')]: {
+    gridTemplateColumns: 'repeat(2, 1fr)',
+  },
+  [theme.breakpoints.up('md')]: {
+    gridTemplateColumns: 'repeat(4, 1fr)',
+  },
+  alignItems: 'stretch',
+}));
+
 const StepCard = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(4),
+  padding: theme.spacing(2.5),
   textAlign: 'center',
-  borderRadius: '12px',
-  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+  borderRadius: 8,
+  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
   height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'flex-start',
   transition: 'transform 0.3s ease, box-shadow 0.3s ease',
   '&:hover': {
-    transform: 'translateY(-5px)',
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
+    transform: 'translateY(-3px)',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)',
   },
 }));
 
 const StepNumber = styled(Box)(({ theme }) => ({
-  width: '50px',
-  height: '50px',
+  width: 40,
+  height: 40,
   backgroundColor: theme.palette.primary.main,
-  color: 'white',
+  color: '#fff',
   borderRadius: '50%',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  margin: '0 auto 1.5rem',
+  margin: '0 auto 1rem',
   fontWeight: 600,
-  fontSize: '1.2rem',
 }));
 
 const HowItWorks = () => {
@@ -75,26 +90,29 @@ const HowItWorks = () => {
 
   return (
     <Section>
-      <Container>
-        <SectionTitle variant="h2" component="h2">
+      <Container maxWidth="lg">
+        <SectionTitle variant="h4" component="h2" gutterBottom>
           How It Works
         </SectionTitle>
 
-        <Grid container spacing={4}>
+        <GridWrap>
           {steps.map((step) => (
-            <Grid item xs={12} sm={6} md={3} key={step.number}>
-              <StepCard elevation={0}>
-                <StepNumber>{step.number}</StepNumber>
-                <Typography variant="h5" component="h3" gutterBottom sx={{ fontWeight: 600 }}>
-                  {step.title}
-                </Typography>
-                <Typography variant="body1" color="textSecondary">
-                  {step.description}
-                </Typography>
-              </StepCard>
-            </Grid>
+            <StepCard key={step.number} elevation={0}>
+              <StepNumber>{step.number}</StepNumber>
+              <Typography
+                variant="subtitle1"
+                component="h3"
+                gutterBottom
+                sx={{ fontWeight: 600, mb: 1 }}
+              >
+                {step.title}
+              </Typography>
+              <Typography variant="body2" color="textSecondary" sx={{ lineHeight: 1.5 }}>
+                {step.description}
+              </Typography>
+            </StepCard>
           ))}
-        </Grid>
+        </GridWrap>
       </Container>
     </Section>
   );

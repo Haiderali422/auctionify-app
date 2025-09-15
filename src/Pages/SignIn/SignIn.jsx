@@ -9,6 +9,8 @@ import {
   Alert,
   CircularProgress,
   FormControlLabel,
+  InputAdornment,
+  IconButton,
   Checkbox,
 } from '@mui/material';
 import { useForm } from 'react-hook-form';
@@ -16,11 +18,13 @@ import CustomInput from '../../Components/Common/CustomInput';
 import CustomButton from '../../Components/Common/CustomButton';
 import { SET_LOADING, SET_TOKENS } from '../../features/auctionSlice';
 import { signInWithEmail, signInWithGoogle } from '../../lib/firebase';
+import eyeIcon from '../../assets/images/iconoir_eye (1).png';
 
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading } = useSelector((state) => state.auction);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
   const {
@@ -37,20 +41,15 @@ const Login = () => {
       const firebaseUser = await signInWithEmail(data.email, data.password);
 
       const idToken = await firebaseUser.getIdToken();
-
-      // 3. Store tokens in Redux and localStorage
       dispatch(
         SET_TOKENS({
           accessToken: idToken,
           refreshToken: firebaseUser.refreshToken,
         })
       );
-      console.log('Login successful ✅');
       navigate('/dashboard');
     } catch (err) {
       console.error('Login error:', err.code, err.message);
-
-      // Handle specific error cases
       if (err.code === 'auth/user-not-found') {
         setError('No account found with this email. Please sign up.');
       } else if (err.code === 'auth/wrong-password') {
@@ -79,8 +78,6 @@ const Login = () => {
           refreshToken: firebaseUser.refreshToken,
         })
       );
-
-      console.log('Google login successful ✅');
       navigate('/dashboard');
     } catch (err) {
       console.error('Google login error:', err.code, err.message);
@@ -90,6 +87,9 @@ const Login = () => {
     }
   };
 
+  const handleTogglePassword = () => {
+    setShowPassword((prev) => !prev);
+  };
   return (
     <Container component="main" maxWidth="sm">
       <Box
@@ -128,12 +128,23 @@ const Login = () => {
 
             <CustomInput
               label="Password"
-              type="password"
+              type={showPassword ? 'password' : 'text'}
               autoComplete="current-password"
               {...register('password', { required: 'Password is required' })}
               error={!!errors.password}
               helperText={errors.password?.message}
               sx={{ mb: 2 }}
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={handleTogglePassword} edge="end">
+                        <img src={eyeIcon} alt={eyeIcon} />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
               fullWidth
             />
 
@@ -149,8 +160,6 @@ const Login = () => {
                 color="secondary"
                 onClick={(e) => {
                   e.preventDefault();
-                  // TODO: Implement forgot password functionality
-                  console.log('Forgot password clicked');
                 }}
                 sx={{ textDecoration: 'none' }}
               >

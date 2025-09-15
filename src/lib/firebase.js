@@ -1,8 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import {
   getAuth,
-  setPersistence,
-  browserLocalPersistence,
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -23,21 +21,12 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-console.log(auth, browserLocalPersistence);
-// persist login across tabs/reloads
-const user = setPersistence(auth, browserLocalPersistence).catch((err) => {
-  console.error('Persistence setup error:', err);
-});
-console.log('user from firebase', user);
-
-localStorage.setItem('firebaseUser', JSON.stringify(user));
 
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({
-  prompt: 'select_account', // or "none" if you want silent login
+  prompt: 'select_account',
 });
 
-// --- Auth helpers you can import anywhere ---
 export const signUpWithEmail = async (email, password) => {
   try {
     const { user } = await createUserWithEmailAndPassword(auth, email, password);
